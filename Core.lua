@@ -5,7 +5,7 @@ Better_Waitlist = LibStub('AceAddon-3.0'):NewAddon('Better_Waitlist',
 													'AceTimer-3.0')
 
 local addon = Better_Waitlist
-local strsplit = strsplit
+local strsplit, tinsert = strsplit, tinsert
 
 local options = {
 	name = 'Better_Waitlist',
@@ -34,7 +34,11 @@ local defaults = {
 		enabled = true,
 	},
 	factionrealm = {
-		wlist = {}
+		wlist = {
+			active = false,
+			list = {},
+			queue = {},
+		},
 	},
 }
 
@@ -49,6 +53,8 @@ function addon:OnInitialize()
 	options.args.profile = LibStub('AceDBOptions-3.0'):GetOptionsTable(self.db)
 	LibStub('AceConfig-3.0'):RegisterOptionsTable('Better_Waitlist',
 	AceComm:RegisterComm('Better_WaitlistCOMM')
+	-- Enable the whisper listener
+	self:RegisterEvent('CHAT_MSG_WHISPER')
 end
 
 function addon:OnEnable()
@@ -68,8 +74,13 @@ function addon:OnCommReceived()
 end
 
 function addon:StartWaitlist()
-	-- Enable the whisper listener
-	self:RegisterEvent('CHAT_MSG_WHISPER')
+	if self:CheckIfActive then
+		print("[BWL] Waitlist already started.")
+		return
+	end
+
+	self.db.factionrealm.wlist.list
+	self.db.factionrealm.wlist.active = true
 end
 
 function addon:CheckIfActive()
@@ -80,8 +91,14 @@ function addon:SendWhisper(recipient, msg, ...)
 	SendChatMessage("[BWL] " .. format(msg, ...), 'WHISPER', nil, recipient)
 end
 
-function addon:ReplyInactive(recipient)
-	SendChatMessage("[BWL] The waitlist is currently inactive, try again later.", 'WHISPER', nil, recipient)
+function addon:PlayerInRaidOrList(player)
+	if UnitInRaid(player) or self.db.factionrealm.wlist[player] then
+		return true
+	end
+	return false
+end
+
+function addon:InsertPlayer(player)
 end
 
 function addon:AddToList(player, password, ...)
@@ -92,19 +109,19 @@ function addon:AddToList(player, password, ...)
 	end
 
 	if config.autoInvite.enabled then
-		if config.autoInvite.enabled == 'enabled' or
+		if config.autoInvite.enabled == 'true' or
 			(config.autoInvite.enabled == 'onlypw' and config.autoInvite.passwd == password) then
 			InviteUnit(player)
 			return
 		end
 	end
 
-	self.db.factionrealm.wlist:push(player)
+	self.db.factionrealm.wlist.list:tinsert(player)
 end
 
 function addon:CHAT_MSG_WHISPER(event, msg, sender)
 	if not self:CheckIfActive() then
-		self:ReplyInactive(sender)
+		self:SendWhisper(sender, 'The waitlist is currently inactive.');
 		return
 	end
 
@@ -113,7 +130,6 @@ function addon:CHAT_MSG_WHISPER(event, msg, sender)
 		local handler = addon[whisper_handlers[command]]
 		handler(self, sender, strsplit(" ", args))
 	end
-
 end
 
 -- vim:ts=4:sw=4:ai
