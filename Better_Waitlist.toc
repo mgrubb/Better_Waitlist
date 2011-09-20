@@ -1,0 +1,9 @@
+## Interface: 40200
+## Title: Better Waitlist manager
+## Notes: This addon provides a standby list for managing raids.
+## Author: Kelebros@US-Ysera
+## Version: 1.0
+## SavedVariables: Better_WaitlistDB
+
+embeds.xml
+Core.lua
