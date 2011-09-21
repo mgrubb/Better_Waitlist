@@ -12,4 +12,5 @@
 	<Include file="Libs\AceComm-3.0\AceComm-3.0.xml" />
 	<Include file="Libs\AceEvent-3.0\AceEvent-3.0.xml" />
 	<Include file="Libs\AceTimer-3.0\AceTimer-3.0.xml" />
+	<Include file="Libs\lib-st\lib-st.xml" />
 </ui>
