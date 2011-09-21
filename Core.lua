@@ -2,13 +2,23 @@ Better_Waitlist = LibStub('AceAddon-3.0'):NewAddon('Better_Waitlist',
 													'AceComm-3.0',
 													'AceEvent-3.0',
 													'AceConsole-3.0',
-													'AceTimer-3.0',
 													'LibWho-2.0')
 
 local addon = Better_Waitlist
 local strsplit, tinsert, InviteUnit, GetChannelList = strsplit, tinsert, InviteUnit, GetChannelList
 local UnitInRaid, GetRaidRosterInfo, SendChatMessage = UnitInRaid, GetRaidRosterInfo, SendChatMessage
-local fmod = math.fmod
+local fmod, removebyval = math.fmod, BetterUtils_removebyval
+
+local function data_meta = {
+	__index = function(t,i)
+		for k,v in pairs(t) do
+			if v.name == i then
+				return v
+			end
+		end
+		return nil
+	end,
+}
 
 local function catenate_to_map(...)
 	local t,k,v,n
@@ -190,10 +200,12 @@ function addon:OnInitialize()
 	options.args.profile = LibStub('AceDBOptions-3.0'):GetOptionsTable(self.db)
 	LibStub('AceConfig-3.0'):RegisterOptionsTable('Better_Waitlist', options, {'betterwl', 'bwl'})
 	self.optionsFrame = LibStub('AceConfigDialog-3.0'):AddToBlizOptions('Better_Waitlist', 'Better_Waitlist')
-	self:RegisterComm('BetterWaitlist')
+	setmetatable(self.db.factionrealm.wlist.list, data_meta)
 	-- Register events
+	self:RegisterComm('BetterWaitlist')
 	self:RegisterEvent('CHAT_MSG_WHISPER')
 	self:RegisterEvent('RAID_ROSTER_UPDATE')
+	self:RegisterMessage('PLAYER_ADDED_TO_WAITLIST')
 end
 
 function addon:OnEnable()
@@ -202,6 +214,7 @@ function addon:OnEnable()
 	if not UnitInRaid('player') and not self:IsActive() then
 		wipe(self.db.factionrealm.wlist.list)
 		wipe(self.db.factionrealm.wlist.queue)
+		setmetatable(self.db.factionrealm.wlist.list, data_meta)
 	else
 		self:StartWaitlist()
 	end
@@ -278,13 +291,33 @@ function addon:AddPlayerToWaitlist(player, data)
 		data.Name = player
 	end
 
-	if not self:PlayerInRaidOrList(player) then
-		local data = { name = data.Name, level = data.Level, class = data.Class }
-		list[player] = data
-		self:SendMessage('PLAYER_ADDED_TO_WAITLIST', player, data)
-		return true
+	if self:PlayerInRaidOrList(player) then
+		return nil
 	end
-	return false
+
+	local ldata = {
+		name = data.Name
+		cols = {
+			{
+				value = data.Name,
+				color = ColorForClass(data.Class),
+			}, -- name column
+			{
+				value = data.Class,
+				color = ColorForClass(data.Class),
+			}, -- class column
+			{
+				value = data.Level
+			}, -- level column
+		},
+	}
+	tinsert(list, ldata)
+	self:SendMessage('PLAYER_ADDED_TO_WAITLIST', player, ldata)
+	return true
+end
+
+function addon:PLAYER_ADDED_TO_WAITLIST(player, data)
+	self:SendWhisper(player, 'You have been added to the waitlist.')
 end
 
 function addon:AddToList(player, password, ...)
