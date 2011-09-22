@@ -9,7 +9,7 @@ local strsplit, tinsert, InviteUnit, GetChannelList = strsplit, tinsert, InviteU
 local UnitInRaid, GetRaidRosterInfo, SendChatMessage = UnitInRaid, GetRaidRosterInfo, SendChatMessage
 local fmod, removebyval = math.fmod, BetterUtils_removebyval
 
-local function data_meta = {
+local data_meta = {
 	__index = function(t,i)
 		for k,v in pairs(t) do
 			if v.name == i then
@@ -296,7 +296,7 @@ function addon:AddPlayerToWaitlist(player, data)
 	end
 
 	local ldata = {
-		name = data.Name
+		name = data.Name,
 		cols = {
 			{
 				value = data.Name,
