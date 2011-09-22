@@ -300,11 +300,11 @@ function addon:AddPlayerToWaitlist(player, data)
 		cols = {
 			{
 				value = data.Name,
-				color = ColorForClass(data.Class),
+				color = RAID_CLASS_COLORS[data.NoLocaleClass]
 			}, -- name column
 			{
 				value = data.Class,
-				color = ColorForClass(data.Class),
+				color = RAID_CLASS_COLORS[data.NoLocaleClass]
 			}, -- class column
 			{
 				value = data.Level
