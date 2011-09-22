@@ -31,6 +31,11 @@ local COLUMNS = {
 		align = 'RIGHT'
 		defaultsort = 'dsc',
 	},
+	{
+		name = 'Invite',
+		width = '20',
+		align = 'CENTER',
+	},
 }
 
 function module:OnInitialize()
@@ -45,5 +50,7 @@ function module:CreateGUI()
 	f:SetStatusText('Active: ' .. tostring(addon:IsActive()))
 	f:SetLayout('Fill')
 	self.frame = f
-	self.dataview = ScrollingTable:CreateST(COLUMNS)
+	self.dataview = ScrollingTable:CreateST(COLUMNS,nil,nil,nil,f)
+	f:AddChild(self.dataview)
+
 end
