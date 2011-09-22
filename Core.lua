@@ -79,8 +79,8 @@ local options = {
 					name = 'Open Delay',
 					desc = 'Delay between messages advertising the start of the raid',
 					type = 'input',
-					get = function() return addon.db.profile.delays.open end,
-					set = function(val) addon.db.profile.delays.open = val; return val end,
+					get = function() return tostring(addon.db.profile.delays.open) end,
+					set = function(info, val) addon.db.profile.delays.open = tonumber(val) end,
 					pattern = '^%d+$',
 					usage = 'Expects an integer value in seconds',
 				},
@@ -88,8 +88,8 @@ local options = {
 					name = 'Full Delay',
 					desc = 'Delay between messages advertising the standby list, after the raid is full',
 					type = 'input',
-					get = function() return addon.db.profile.delays.full end,
-					set = function(val) addon.db.profile.delays.full = val; return val end,
+					get = function() return tostring(addon.db.profile.delays.full) end,
+					set = function(info, val) addon.db.profile.delays.full = tonumber(val) end,
 					pattern = '^%d+$',
 					usage = 'Expects an integer value in seconds',
 				},
@@ -104,21 +104,24 @@ local options = {
 					desc = 'Message displayed while the list is open but the raid is not full',
 					type = 'input',
 					get = function() return addon.db.profile.messages.open end,
-					set = function(val) addon.db.profile.messages.open = val; return val end,
+					set = function(info, val) addon.db.profile.messages.open = val end,
+					width = 'full',
 				},
 				full = {
-						name = 'Full Message',
-						desc = 'Message displayed while the raid is full',
-						type = 'input',
-						get = function() return addon.db.profile.messages.full end,
-						set = function(val) addon.db.profile.messages.full = val; return val end,
+					name = 'Full Message',
+					desc = 'Message displayed while the raid is full',
+					type = 'input',
+					get = function() return addon.db.profile.messages.full end,
+					set = function(info, val) addon.db.profile.messages.full = val end,
+					width = 'full',
 				},
 				filled = {
-						name = 'Filled Message',
-						desc = 'Message displayed when the raid has become filled.',
-						type = 'input',
-						get = function() return addon.db.profile.messages.filled end,
-						set = function(val) addon.db.profile.messages.filled = val; return val end,
+					name = 'Filled Message',
+					desc = 'Message displayed when the raid has become filled.',
+					type = 'input',
+					get = function() return addon.db.profile.messages.filled end,
+					set = function(info, val) addon.db.profile.messages.filled = val end,
+					width = 'full',
 				},
 			},
 		},
@@ -128,7 +131,7 @@ local options = {
 			type = 'select',
 			values = function() return getChannelTable() end,
 			get = function() return addon.db.profile.channel end,
-			set = function(val) addon.db.profile.channel = val; return val end,
+			set = function(info, val) addon.db.profile.channel = val end,
 		},
 		autoinvite = {
 			type = 'group',
@@ -140,23 +143,30 @@ local options = {
 					type = 'select',
 					values = { always = 'Always', onlypw = 'With Password', never = 'Never' },
 					get = function() return addon.db.profile.autoInvite.mode end,
-					set = function(val) addon.db.profile.autoInvite.mode = val; return val end,
+					set = function(info, val) addon.db.profile.autoInvite.mode = val end,
 				},
 				password = {
 					name = 'Password',
 					desc = 'Password needed to give out auto-invitation',
 					type = 'input',
 					get = function() return addon.db.profile.autoInvite.password end,
-					set = function(val) addon.db.profile.autoInvite.password = val; return val end,
+					set = function(info, val) addon.db.profile.autoInvite.password = val end,
+					disabled = function() return addon.db.profile.autoInvite.mode ~= 'onlypw' end,
 				},
 			},
 		},
-		enabled = {
-			type = 'toggle',
-			name = 'Enabled',
-			desc = 'Addon Enabled',
-			get = 'IsEnabled',
-			set = 'Disable',
+		general = {
+			type = 'group',
+			name = 'General Options',
+			args = {
+				enabled = {
+					type = 'toggle',
+					name = 'Enabled',
+					desc = 'Addon Enabled',
+					get = 'IsEnabled',
+					set = 'Disable',
+				},
+			},
 		},
 	},
 }
@@ -199,7 +209,13 @@ function addon:OnInitialize()
 	self.db = LibStub('AceDB-3.0'):New('Better_WaitlistDB', defaults, true)
 	options.args.profile = LibStub('AceDBOptions-3.0'):GetOptionsTable(self.db)
 	LibStub('AceConfig-3.0'):RegisterOptionsTable('Better_Waitlist', options, {'betterwl', 'bwl'})
-	self.optionsFrame = LibStub('AceConfigDialog-3.0'):AddToBlizOptions('Better_Waitlist', 'Better_Waitlist')
+	local acd = LibStub('AceConfigDialog-3.0')
+	self.optionsFrame = acd:AddToBlizOptions('Better_Waitlist', nil, nil, 'general')
+	acd:AddToBlizOptions('Better_Waitlist', options.args.delays.name, 'Better_Waitlist', 'delays')
+	acd:AddToBlizOptions('Better_Waitlist', options.args.messages.name, 'Better_Waitlist', 'messages')
+	acd:AddToBlizOptions('Better_Waitlist', options.args.autoinvite.name, 'Better_Waitlist', 'autoinvite')
+	acd:AddToBlizOptions('Better_Waitlist', options.args.profile.name, 'Better_Waitlist', 'profile')
+
 	setmetatable(self.db.factionrealm.wlist.list, data_meta)
 	-- Register events
 	self:RegisterComm('BetterWaitlist')
