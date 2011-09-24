@@ -201,6 +201,7 @@ local defaults = {
 local whisper_handlers = {
 	invite = 'AddToList',
 	add = 'AddToList',
+	accept = 'SendRaidInvite',
 	remove = 'RemoveFromList',
 }
 
@@ -271,9 +272,14 @@ function addon:SendWhisper(recipient, msg, ...)
 	SendChatMessage("[BWL] " .. format(msg, ...), 'WHISPER', nil, recipient)
 end
 
+function addon:GetPlayerData(player)
+	local _, queue, list = self:GetWaitlist()
+	return list[player]
+end
+
 function addon:PlayerInRaidOrList(player)
-	local queue, list = self:GetWaitlist()
-	if UnitInRaid(player) or list[player] or queue[player] then
+	local _, queue = self:GetWaitlist()
+	if UnitInRaid(player) or self:GetPlayerData(player) or queue[player] then
 		return true
 	end
 	return false
@@ -350,7 +356,7 @@ function addon:AddToList(player, password, ...)
 	if config.autoInvite.mode then
 		if config.autoInvite.mode == 'enabled' or
 			(config.autoInvite.mode == 'onlypw' and config.autoInvite.password == password) then
-			InviteUnit(player)
+			self:SendRaidInvite(player, true)
 			return nil
 		end
 	end
@@ -359,6 +365,46 @@ function addon:AddToList(player, password, ...)
 	if data then
 		self:AddPlayerToWaitlist(player, data)
 	end
+end
+
+function addon:RemovePlayerFromLists(player)
+	local _, queue, list = self:GetWaitlist()
+	queue[player] = nil
+	removebyval(list, list[player])
+end
+
+function addon:AcceptPlayer(player)
+	local data = self:GetPlayerData()
+	if not self:IsActive() or not data then
+		return nil
+	end
+
+	data.accepted = true
+	self:SendWhisper('You have been invited to the raid.  Reply with the word \'accept\' to get your invite')
+	return true
+end
+
+function addon:SendRaidInvite(player, auto)
+	local data = self:GetPlayerData()
+	if auto then
+		self:RemovePlayerFromLists(player)
+		InviteUnit(player)
+		return true
+	end
+
+	if not data then
+		self:SendWhisper('Could not find data for you, add yourself to the waitlist again')
+		return false
+	end
+
+	if not data.accepted then
+		self:SendWhisper('You haven\'t recieved and invite yet.')
+		return false
+	end
+
+	self:RemovePlayerFromLists(player)
+	InviteUnit(player)
+	return true
 end
 
 function addon:RAID_ROSTER_UPDATE()
