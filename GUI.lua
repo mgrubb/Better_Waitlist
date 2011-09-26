@@ -1,13 +1,6 @@
-Better_Waitlist_GUI = Better_Waitlist:NewModule('Better_Waitlist_GUI',
-												'AceEvent-3.0',
-												'AceTimer-3.0',
-												'AceGUI-3.0')
-local module = Better_Waitlist_GUI
-local addon = Better_Waitlist
-local ScrollingTable = LibStub('ScrollingTable')
-local AceGUI = LibStub('AceGUI-3.0')
-
-local function cellUpdate(...) module:UpdateCell(...) end
+local addon = select(2, ...);
+local ScrollingTable = LibStub('ScrollingTable');
+local AceGUI = LibStub('AceGUI-3.0');
 
 local COLUMNS = {
 	{
@@ -16,19 +9,17 @@ local COLUMNS = {
 		align = 'LEFT',
 		defaultsort = 'dsc',
 		sortnext = 3,
-		DoCellUpdate = cellUpdate,
 	},
 	{
 		name = 'Class',
 		width = 50,
 		align = 'LEFT',
 		defaultsort = 'dsc',
-		DoCellUpdate = cellUpdate,
 	},
 	{
 		name = 'Level',
 		width = '20',
-		align = 'RIGHT'
+		align = 'RIGHT',
 		defaultsort = 'dsc',
 	},
 	{
@@ -36,21 +27,54 @@ local COLUMNS = {
 		width = '20',
 		align = 'CENTER',
 	},
-}
+};
 
-function module:OnInitialize()
-	self.list = select(3, addon:GetWaitlist())
-	self:CreateGUI()
+function addon:CreateGUI()
+	local f = AceGUI:Create('Frame');
+	f:SetCallback('OnClose', function(widget) AceGUI:Release(widget) end);
+	f:SetTitle('Waitlist');
+	f:SetStatusText('Active: ' .. tostring(addon:IsActive()));
+	f:SetLayout('Fill');
+	self.frame = f;
+	self.dataview = AceGUI:Create('lib-st');
+	self.dataview:CreateST(COLUMNS,nil,nil,nil);
+	f:AddChild(self.dataview);
 end
 
-function module:CreateGUI()
-	local f = AceGUI:Create('Frame')
-	f:SetCallback('OnClose', function(widget) AceGUI:Release(widget) end)
-	f:SetTitle('Waitlist')
-	f:SetStatusText('Active: ' .. tostring(addon:IsActive()))
-	f:SetLayout('Fill')
-	self.frame = f
-	self.dataview = ScrollingTable:CreateST(COLUMNS,nil,nil,nil,f)
-	f:AddChild(self.dataview)
+function addon:AddSampleData()
+	local data = {
+		{
+			cols = {
+				{
+					value = 'Kelebros',
+					color = RAID_CLASS_COLORS['DRUID'],
+				},
+				{
+					value = 'Druid',
+					color = RAID_CLASS_COLORS['DRUID'],
+				},
+				{
+					value = "85",
+				},
+			},
+		},
+		{
+			cols = {
+				{
+					value = 'Humbaba',
+					color = RAID_CLASS_COLORS['WARLOCK'],
+				},
+				{
+					value = 'Warlock',
+					color = RAID_CLASS_COLORS['WARLOCK'],
+				},
+				{
+					value = '85',
+				},
+			},
+		},
+	};
 
+	self.dataview.st:SetData(data);
 end
+
