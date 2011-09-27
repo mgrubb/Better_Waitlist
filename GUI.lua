@@ -17,6 +17,11 @@ local COLUMNS = {
 		defaultsort = 'dsc',
 	},
 	{
+		name = 'Role',
+		width = 50,
+		align = 'LEFT',
+		defaultsort = 'dsc',
+	{
 		name = 'Level',
 		width = '20',
 		align = 'RIGHT',
@@ -39,6 +44,18 @@ function addon:CreateGUI()
 	self.dataview = AceGUI:Create('lib-st');
 	self.dataview:CreateST(COLUMNS,nil,nil,nil);
 	f:AddChild(self.dataview);
+
+	--[[ section overall control ]]--
+	--[[
+		Button to open config
+		Raid Size Slider
+		Start Button
+		Stop Button
+		Invite All Button
+		Invite Selected Button
+	--]]
+
+
 end
 
 function addon:AddSampleData()
