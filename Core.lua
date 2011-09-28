@@ -58,7 +58,7 @@ local options = {
 			desc = 'Open the configuration window',
 			type = 'execute',
 			guiHidden = true,
-			func = function() InterfaceOptionsFrame_OpenToCategory(addon.optionsFrame) end,
+			func = 'OpenConfigWindow',
 		},
 		start = {
 			name = 'Start',
@@ -248,9 +248,17 @@ end
 function addon:OnCommReceived()
 end
 
+function addon:OpenConfigWindow()
+	InterfaceOptionsFrame_OpenToCategory(self.optionsFrame);
+end
+
 function addon:SetActive(val)
 	self.db.factionrealm.wlist.active = val;
 	return val;
+end
+
+function addon:InviteAll()
+	print('Invite All: Not Yet Implemented');
 end
 
 function addon:StartWaitlist()
