@@ -5,32 +5,32 @@ local AceGUI = LibStub('AceGUI-3.0');
 local COLUMNS = {
 	{
 		name = 'Name',
-		width = 50,
+		width = 275,
 		align = 'LEFT',
 		defaultsort = 'dsc',
 		sortnext = 3,
 	},
 	{
 		name = 'Class',
-		width = 50,
+		width = 138,
 		align = 'LEFT',
 		defaultsort = 'dsc',
 	},
 	{
 		name = 'Role',
-		width = 50,
+		width = 46,
 		align = 'LEFT',
 		defaultsort = 'dsc',
 	},
 	{
 		name = 'Level',
-		width = '20',
+		width = '46',
 		align = 'RIGHT',
 		defaultsort = 'dsc',
 	},
 	{
 		name = 'Invite',
-		width = '20',
+		width = '46',
 		align = 'CENTER',
 	},
 };
@@ -44,8 +44,25 @@ function addon:CreateGUI()
 	f:SetStatusTable({width=900, height=550});
 	f:PauseLayout();
 
-	--[[ section overall control ]]--
+
 	local rhs_width = 0.20;
+	
+	--[[ Data view section ]]--
+	local sg = AceGUI:Create('SimpleGroup');
+	sg:SetLayout('Fill');
+	sg:SetRelativeWidth(0.99 - rhs_width);
+	sg:SetFullHeight(true);
+	sg.alignoffset = 25;
+
+	local dataview = AceGUI:Create('lib-st');
+	dataview:CreateST(COLUMNS,12,15);
+	-- sg:SetHeight(dataview.st.displayRows * dataview.st.rowHeight * 2);
+	-- sg:AddChild(dataview);
+	-- f:AddChild(sg);
+	sg:AddChild(dataview);
+	f:AddChild(sg);
+
+--[[ section overall control ]]--
 	local sg = AceGUI:Create('SimpleGroup');
 	sg:SetLayout('Flow');
 	sg:SetRelativeWidth(rhs_width);
@@ -111,22 +128,6 @@ function addon:CreateGUI()
 	sg:ResumeLayout();
 	f:AddChild(sg);
 
-	--[[ Data view section ]]--
-	local sg = AceGUI:Create('SimpleGroup');
-	sg:SetLayout('Fill');
-	sg:SetRelativeWidth(0.99 - rhs_width);
-	sg:SetFullHeight(true);
-	sg.alignoffset = 25;
-
-	local dataview = AceGUI:Create('lib-st');
-	dataview:CreateST(COLUMNS,12,15);
-	-- sg:SetHeight(dataview.st.displayRows * dataview.st.rowHeight * 2);
-	-- sg:AddChild(dataview);
-	-- f:AddChild(sg);
-	sg:AddChild(dataview);
-	f:AddChild(sg);
-
-
 	f:ResumeLayout();
 	f:DoLayout();
 	f:ApplyStatus();
@@ -149,7 +150,10 @@ function addon:AddSampleData()
 					color = RAID_CLASS_COLORS['DRUID'],
 				},
 				{
-					value = "85",
+					value = 'Tank'
+				},
+				{
+					value = '85',
 				},
 			},
 		},
@@ -162,6 +166,9 @@ function addon:AddSampleData()
 				{
 					value = 'Warlock',
 					color = RAID_CLASS_COLORS['WARLOCK'],
+				},
+				{
+					value = 'DPS'
 				},
 				{
 					value = '85',
