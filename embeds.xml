@@ -13,5 +13,6 @@
 	<Include file="Libs\AceTimer-3.0\AceTimer-3.0.xml" />
 	<Include file="Libs\lib-st\lib-st.xml" />
 	<Script file="AceGUIWidget-lib-st.lua" />
+	<Script file="AceGUIWidget-Spacer.lua" />
 	<Script file="Libs\Utils.lua" />
 </ui>
