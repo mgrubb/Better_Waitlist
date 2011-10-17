@@ -351,13 +351,13 @@ function addon:AddPlayerToWaitlist(player, data)
 	return true;
 end
 
-function addon:PLAYER_ADDED_TO_WAITLIST(player, data)
+function addon:PLAYER_ADDED_TO_WAITLIST(event, player, data)
 	self:SendWhisper(player, 'You have been added to the waitlist.');
 end
 
 function addon:AddToList(player, password, ...)
 	if not self:IsActive() then
-		self:SendWhisper(sender, 'The waitlist is currently inactive.');
+		self:SendWhisper(player, 'The waitlist is currently inactive.');
 		return nil;
 	end
 	local config = self.db.profile;
@@ -442,7 +442,7 @@ function addon:CHAT_MSG_WHISPER(event, msg, sender)
 	local command, args = strsplit(" ", msg);
 	if whisper_handlers[command] then
 		local handler = addon[whisper_handlers[command]];
-		handler(self, sender, strsplit(" ", args));
+		handler(self, sender, strsplit(" ", args or ""));
 	end
 end
 
